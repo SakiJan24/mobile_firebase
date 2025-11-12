@@ -1,7 +1,5 @@
 package com.example.tallerfinal.navigation
 
-
-
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -13,17 +11,19 @@ import com.example.tallerfinal.ui.screens.auth.RegisterScreen
 import com.example.tallerfinal.ui.screens.main.HomeScreen
 import com.example.tallerfinal.ui.screens.main.ProfileScreen
 
-
+/*
+ * Sistema de navegación de la aplicación
+ * Maneja las rutas entre pantallas y el estado de autenticación
+ */
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
 
-    // Determina la ruta inicial basándose en si el usuario ya está logueado
     val startDestination = if (authViewModel.currentUser != null) {
-        "home" // Si está logueado, va a Home
+        "home"
     } else {
-        "login" // Si no, va a Login
+        "login"
     }
 
     NavHost(navController = navController, startDestination = startDestination) {

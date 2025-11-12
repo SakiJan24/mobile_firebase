@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+.idea/copilot/
+.idea/github-copilot.xml
+copilot/
+

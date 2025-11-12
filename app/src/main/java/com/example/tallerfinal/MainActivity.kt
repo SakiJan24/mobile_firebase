@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.tallerfinal.navigation.AppNavigation
 import com.example.tallerfinal.ui.theme.TallerFinalTheme
-import com.google.firebase.FirebaseApp   // 👈 import this
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

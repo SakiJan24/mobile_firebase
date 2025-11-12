@@ -13,40 +13,39 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/*
+ * ViewModel de autenticación
+ * Maneja el registro, login y logout de usuarios
+ * Utiliza Firebase Authentication para credenciales
+ * Utiliza Firebase Realtime Database para datos adicionales
+ */
 class AuthViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val database: FirebaseDatabase = Firebase.database("https://tallerfinal-ac2d4-default-rtdb.firebaseio.com/") // <-- IMPORTANTE: Pon la URL de tu Realtime Database
+    private val database: FirebaseDatabase = Firebase.database("https://tallerfinal-ac2d4-default-rtdb.firebaseio.com/")
 
-    // Estado para la UI (Loading, Success, Error)
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    // Estado para saber si el usuario está logueado (observa el estado real de Firebase)
     val currentUser = auth.currentUser
-
-    // --- Funciones de Autenticación ---
 
     fun register(name: String, email: String, pass: String, phone: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                // 1. Crear usuario en Firebase Auth
                 val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
                 val firebaseUser = authResult.user
 
                 if (firebaseUser != null) {
-                    // 2. Crear objeto de usuario para la base de datos
                     val user = User(
                         name = name,
                         email = email,
                         phone = phone,
-                        isOnline = false, // Valor inicial
+                        isOnline = false,
                         latitude = 0.0,
                         longitude = 0.0
                     )
 
-                    // 3. Guardar datos adicionales en Realtime Database
                     database.getReference("users").child(firebaseUser.uid).setValue(user).await()
                     _authState.value = AuthState.Success
                 } else {
@@ -72,16 +71,17 @@ class AuthViewModel : ViewModel() {
 
     fun logout() {
         auth.signOut()
-        _authState.value = AuthState.Idle // Resetea el estado
+        _authState.value = AuthState.Idle
     }
 
-    // Resetea el estado (por ejemplo, después de mostrar un error)
     fun resetAuthState() {
         _authState.value = AuthState.Idle
     }
 }
 
-// Clase sellada para manejar los estados de la UI
+/*
+ * Estados posibles de la autenticación
+ */
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()

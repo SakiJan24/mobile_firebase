@@ -1,8 +1,10 @@
 package com.example.tallerfinal.ui.screens.main
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tallerfinal.data.User
+import com.example.tallerfinal.services.ImageUploadService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
@@ -14,10 +16,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/*
+ * ViewModel de perfil de usuario
+ * Maneja la carga y actualización de datos del perfil
+ * Gestiona cambio de contraseña y upload de foto de perfil
+ */
 class ProfileViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val database: FirebaseDatabase = Firebase.database("URL_DE_TU_DATABASE_AQUI") // <-- IMPORTANTE: Pon la URL de tu Realtime Database
+    private val database: FirebaseDatabase = Firebase.database("https://tallerfinal-ac2d4-default-rtdb.firebaseio.com/")
+    private val imageUploadService = ImageUploadService()
 
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
@@ -40,7 +48,6 @@ class ProfileViewModel : ViewModel() {
                     val user = snapshot.getValue<User>()
                     _user.value = user
                 } catch (e: Exception) {
-                    // Manejar error de carga
                 }
             }
         }
@@ -57,7 +64,6 @@ class ProfileViewModel : ViewModel() {
                     )
                     database.getReference("users").child(uid).updateChildren(updates).await()
                     _updateStatus.value = UpdateStatus.Success("Perfil actualizado")
-                    // Recargar datos
                     loadUserProfile()
                 } catch (e: Exception) {
                     _updateStatus.value = UpdateStatus.Error(e.message ?: "Error al actualizar")
@@ -78,11 +84,31 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+    fun uploadProfileImage(imageUri: Uri) {
+        viewModelScope.launch {
+            _updateStatus.value = UpdateStatus.Loading
+            userId?.let { uid ->
+                try {
+                    val imageUrl = imageUploadService.uploadProfileImage(imageUri)
+                    val updates = mapOf("profileImageUrl" to imageUrl)
+                    database.getReference("users").child(uid).updateChildren(updates).await()
+                    _updateStatus.value = UpdateStatus.Success("Foto de perfil actualizada")
+                    loadUserProfile()
+                } catch (e: Exception) {
+                    _updateStatus.value = UpdateStatus.Error(e.message ?: "Error al subir imagen")
+                }
+            }
+        }
+    }
+
     fun resetUpdateStatus() {
         _updateStatus.value = UpdateStatus.Idle
     }
 }
 
+/*
+ * Estados posibles de las operaciones de actualización
+ */
 sealed class UpdateStatus {
     object Idle : UpdateStatus()
     object Loading : UpdateStatus()

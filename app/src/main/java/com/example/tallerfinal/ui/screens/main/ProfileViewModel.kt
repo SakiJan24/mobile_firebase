@@ -17,7 +17,7 @@ import kotlinx.coroutines.tasks.await
 class ProfileViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val database: FirebaseDatabase = Firebase.database("URL_DE_TU_DATABASE_AQUI") // <-- IMPORTANTE: Pon la URL de tu Realtime Database
+    private val database: FirebaseDatabase = Firebase.database("https://tallerfinal-ac2d4-default-rtdb.firebaseio.com/") // <-- IMPORTANTE: Pon la URL de tu Realtime Database
 
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user

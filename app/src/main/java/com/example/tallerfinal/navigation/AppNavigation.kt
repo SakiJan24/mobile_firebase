@@ -19,11 +19,10 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
 
-    // Determina la ruta inicial basándose en si el usuario ya está logueado
     val startDestination = if (authViewModel.currentUser != null) {
-        "home" // Si está logueado, va a Home
+        "home"
     } else {
-        "login" // Si no, va a Login
+        "login"
     }
 
     NavHost(navController = navController, startDestination = startDestination) {

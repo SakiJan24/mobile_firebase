@@ -1,14 +1,15 @@
 package com.example.tallerfinal.services
 
-
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
 import android.os.Looper
 import com.google.android.gms.location.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class LocationHandler(
     context: Context,
@@ -18,10 +19,17 @@ class LocationHandler(
     private val auth = Firebase.auth
     private val database = Firebase.database(databaseUrl)
 
+    // --- Flujo para emitir la ubicación a la UI ---
+    private val _locationFlow = MutableStateFlow<Location?>(null)
+    val locationFlow: StateFlow<Location?> = _locationFlow
+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
-                // Actualizar la localización en Firebase en tiempo real
+                // 1. Emitir la ubicación a la UI (HomeScreen)
+                _locationFlow.value = location
+
+                // 2. Actualizar la localización en Firebase en tiempo real
                 updateLocationInDatabase(location.latitude, location.longitude, true)
             }
         }
@@ -42,7 +50,9 @@ class LocationHandler(
 
     fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-        // Actualizar el estado a "offline"
+        // 1. Limpiar la ubicación en la UI
+        _locationFlow.value = null
+        // 2. Actualizar el estado a "offline" en Firebase
         updateLocationInDatabase(0.0, 0.0, false)
     }
 

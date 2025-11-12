@@ -312,8 +312,9 @@ fun HomeScreen(
 
                     // Contador de usuarios en línea
                     Spacer(modifier = Modifier.height(8.dp))
+                    val totalOnline = if (isOnline) onlineUsers.size + 1 else onlineUsers.size
                     Text(
-                        text = "Usuarios en línea: ${onlineUsers.size}",
+                        text = "Usuarios en línea: ${totalOnline}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
